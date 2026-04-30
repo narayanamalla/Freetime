@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
+import Latex from '@/components/ui/latex'
 
 type QuestionViewProps = {
   question: any
@@ -77,8 +78,8 @@ export default function QuestionView({ question, options, previousAttempt }: Que
             </span>
           </div>
 
-          <div className="text-[15px] text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {question.statement}
+          <div className="text-[15px] text-gray-700 leading-relaxed">
+            <Latex>{question.statement}</Latex>
           </div>
 
           {question.hint && (
@@ -89,7 +90,7 @@ export default function QuestionView({ question, options, previousAttempt }: Que
               </button>
               {showHint && (
                 <div className="mt-3 text-sm text-indigo-700 bg-indigo-50 rounded-xl p-4">
-                  {question.hint}
+                  <Latex>{question.hint}</Latex>
                 </div>
               )}
             </div>
@@ -104,8 +105,8 @@ export default function QuestionView({ question, options, previousAttempt }: Que
               {showExplanation ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
             </button>
             {showExplanation && (
-              <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap border-t border-gray-100 pt-4">
-                {question.solution || "No detailed solution provided for this question."}
+              <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                <Latex>{question.solution || "No detailed solution provided for this question."}</Latex>
               </div>
             )}
           </div>
@@ -144,7 +145,7 @@ export default function QuestionView({ question, options, previousAttempt }: Que
                   return (
                     <div key={opt.id} className={`flex items-center gap-3 p-3.5 border rounded-2xl transition-all cursor-pointer ${border}`}>
                       <RadioGroupItem value={opt.id} id={opt.id} className="shrink-0" />
-                      <Label htmlFor={opt.id} className="flex-1 cursor-pointer text-sm text-gray-700 font-medium">{opt.text}</Label>
+                      <Label htmlFor={opt.id} className="flex-1 cursor-pointer text-sm text-gray-700 font-medium"><Latex>{opt.text}</Latex></Label>
                       {showCorrectness && opt.is_correct && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
                       {showCorrectness && isSelected && !opt.is_correct && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
                     </div>

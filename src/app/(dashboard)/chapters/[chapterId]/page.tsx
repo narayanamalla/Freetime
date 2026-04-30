@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { CheckCircle2, XCircle, Circle } from 'lucide-react'
+import Latex from '@/components/ui/latex'
 
 export default async function ChapterQuestionsPage({ params }: { params: Promise<{ chapterId: string }> }) {
   const { chapterId } = await params
@@ -84,7 +85,7 @@ export default async function ChapterQuestionsPage({ params }: { params: Promise
                       {String(idx + 1).padStart(2, '0')}
                     </span>
                     <p className="text-sm text-gray-700 truncate font-medium">
-                      {q.statement.substring(0, 120)}
+                      <Latex>{q.statement.substring(0, 120)}</Latex>
                     </p>
                   </div>
 
