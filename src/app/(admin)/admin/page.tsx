@@ -100,6 +100,9 @@ export default async function AdminDashboardPage({
                         <Link href={`/questions/${q.id}`} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold">
                           View
                         </Link>
+                        <Link href={`/admin/questions/${q.id}/edit`} className="text-amber-600 hover:text-amber-800 text-xs font-bold">
+                          Edit
+                        </Link>
                         <DeleteQuestionButton questionId={q.id} />
                       </div>
                     </td>
