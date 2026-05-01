@@ -6,32 +6,37 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import { CheckCircle2, XCircle, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
+import { CheckCircle2, XCircle, ChevronDown, ChevronUp, Eye, EyeOff, RotateCcw, History } from 'lucide-react'
 import Latex from '@/components/ui/latex'
 
 type QuestionViewProps = {
   question: any
   options: any[]
-  previousAttempt: any | null
+  attempts: any[]
 }
 
-export default function QuestionView({ question, options, previousAttempt }: QuestionViewProps) {
-  const [selectedOption, setSelectedOption] = useState<string>(previousAttempt?.answer || '')
-  const [numericalAnswer, setNumericalAnswer] = useState<string>(previousAttempt?.answer || '')
+export default function QuestionView({ question, options, attempts: initialAttempts }: QuestionViewProps) {
+  const [attempts, setAttempts] = useState<any[]>(initialAttempts)
+  const latestAttempt = attempts.length > 0 ? attempts[0] : null
+  
+  const [practiceMode, setPracticeMode] = useState<boolean>(attempts.length === 0)
+  const [selectedOption, setSelectedOption] = useState<string>('')
+  const [numericalAnswer, setNumericalAnswer] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<{ success?: boolean; isCorrect?: boolean; error?: string } | null>(null)
   const [timeTaken, setTimeTaken] = useState(0)
   const [showHint, setShowHint] = useState(false)
-  const [showExplanation, setShowExplanation] = useState(true)
+  const [showExplanation, setShowExplanation] = useState(false) // default hidden for practice mode
 
-  const isSolved = previousAttempt?.is_correct || result?.isCorrect
-  const showSolution = isSolved || previousAttempt || result
+  // If we are not in practice mode, the question is effectively "solved" (or at least attempted)
+  const isSolved = !practiceMode && (result?.isCorrect || latestAttempt?.is_correct)
+  const showSolution = !practiceMode || result
 
   useEffect(() => {
-    if (isSolved || previousAttempt) return
+    if (!practiceMode) return
     const timer = setInterval(() => setTimeTaken(p => p + 1), 1000)
     return () => clearInterval(timer)
-  }, [isSolved, previousAttempt])
+  }, [practiceMode])
 
   const handleSubmit = async () => {
     const answer = question.type === 'mcq' ? selectedOption : numericalAnswer
@@ -39,7 +44,27 @@ export default function QuestionView({ question, options, previousAttempt }: Que
     setIsSubmitting(true)
     const res = await submitAttempt(question.id, answer, timeTaken)
     setResult(res)
+    
+    // Add to attempts locally so it shows in history immediately
+    const newAttempt = {
+      id: Math.random().toString(), // temp ID
+      answer,
+      is_correct: res.isCorrect,
+      time_taken: timeTaken,
+      created_at: new Date().toISOString()
+    }
+    setAttempts(prev => [newAttempt, ...prev])
+    setPracticeMode(false)
     setIsSubmitting(false)
+  }
+
+  const handlePracticeAgain = () => {
+    setPracticeMode(true)
+    setResult(null)
+    setSelectedOption('')
+    setNumericalAnswer('')
+    setTimeTaken(0)
+    setShowExplanation(false)
   }
 
   const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
@@ -114,10 +139,10 @@ export default function QuestionView({ question, options, previousAttempt }: Que
       </div>
 
       {/* Right: Answer Panel */}
-      <div className="lg:w-[380px] shrink-0">
+      <div className="lg:w-[380px] shrink-0 space-y-5">
         <div className="premium-card p-6 sticky top-[90px]" style={{ cursor: 'default' }}>
           {/* Timer */}
-          {!isSolved && !previousAttempt && (
+          {practiceMode && (
             <div className="flex items-center justify-end gap-2 mb-5">
               <div className="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full">
                 <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -131,11 +156,11 @@ export default function QuestionView({ question, options, previousAttempt }: Que
           <h3 className="font-bold text-gray-900 mb-4">Your Answer</h3>
 
           {question.type === 'mcq' ? (
-            <RadioGroup value={selectedOption} onValueChange={setSelectedOption} disabled={!!previousAttempt || !!result}>
+            <RadioGroup value={practiceMode ? selectedOption : (latestAttempt?.answer || '')} onValueChange={setSelectedOption} disabled={!practiceMode}>
               <div className="space-y-2.5">
                 {options.map((opt, idx) => {
-                  const isSelected = selectedOption === opt.id
-                  const showCorrectness = !!result || !!previousAttempt
+                  const isSelected = practiceMode ? selectedOption === opt.id : latestAttempt?.answer === opt.id
+                  const showCorrectness = !practiceMode
 
                   let border = 'border-gray-150 hover:border-indigo-200 hover:bg-indigo-50/30'
                   if (isSelected && !showCorrectness) border = 'border-indigo-400 bg-indigo-50 ring-2 ring-indigo-100'
@@ -157,14 +182,14 @@ export default function QuestionView({ question, options, previousAttempt }: Que
             <Input
               type="text"
               placeholder="Enter numerical value"
-              value={numericalAnswer}
+              value={practiceMode ? numericalAnswer : (latestAttempt?.answer || '')}
               onChange={(e) => setNumericalAnswer(e.target.value)}
-              disabled={!!previousAttempt || !!result}
+              disabled={!practiceMode}
               className="h-12 rounded-xl text-base"
             />
           )}
 
-          {!previousAttempt && !result && (
+          {practiceMode && (
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || (question.type === 'mcq' ? !selectedOption : !numericalAnswer)}
@@ -174,31 +199,77 @@ export default function QuestionView({ question, options, previousAttempt }: Que
             </button>
           )}
 
-          {(result || previousAttempt) && (
+          {!practiceMode && (
             <div className={`mt-5 p-4 rounded-2xl flex items-center gap-3 ${
-              (result?.isCorrect ?? previousAttempt?.is_correct)
+              latestAttempt?.is_correct
                 ? 'bg-emerald-50 border border-emerald-200'
                 : 'bg-red-50 border border-red-200'
             }`}>
-              {(result?.isCorrect ?? previousAttempt?.is_correct)
+              {latestAttempt?.is_correct
                 ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 : <XCircle className="h-5 w-5 text-red-500" />
               }
-              <div>
+              <div className="flex-1">
                 <p className={`text-sm font-bold ${
-                  (result?.isCorrect ?? previousAttempt?.is_correct) ? 'text-emerald-700' : 'text-red-700'
+                  latestAttempt?.is_correct ? 'text-emerald-700' : 'text-red-700'
                 }`}>
-                  {(result?.isCorrect ?? previousAttempt?.is_correct) ? 'Correct Answer!' : 'Incorrect Answer'}
+                  {latestAttempt?.is_correct ? 'Correct Answer!' : 'Incorrect Answer'}
                 </p>
                 <p className={`text-[11px] mt-0.5 ${
-                  (result?.isCorrect ?? previousAttempt?.is_correct) ? 'text-emerald-500' : 'text-red-400'
+                  latestAttempt?.is_correct ? 'text-emerald-500' : 'text-red-400'
                 }`}>
-                  {(result?.isCorrect ?? previousAttempt?.is_correct) ? 'Great job!' : 'Review the solution below.'}
+                  {latestAttempt?.is_correct ? 'Great job!' : 'Review the solution below.'}
                 </p>
               </div>
             </div>
           )}
+
+          {!practiceMode && (
+            <button
+              onClick={handlePracticeAgain}
+              className="w-full mt-4 h-11 rounded-xl border-2 border-indigo-100 bg-white text-indigo-600 font-bold text-sm hover:bg-indigo-50 hover:border-indigo-200 transition-all flex items-center justify-center gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Practice Again
+            </button>
+          )}
         </div>
+
+        {/* Submissions History */}
+        {attempts.length > 0 && (
+          <div className="premium-card p-6" style={{ cursor: 'default' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <History className="h-4 w-4 text-gray-400" />
+              <h3 className="font-bold text-gray-900 text-sm">Previous Submissions</h3>
+            </div>
+            <div className="space-y-2">
+              {attempts.map((attempt, idx) => (
+                <div key={attempt.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {attempt.is_correct ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-400" />
+                    )}
+                    <div>
+                      <p className="text-xs font-semibold text-gray-700">
+                        {attempt.is_correct ? 'Accepted' : 'Wrong Answer'}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {new Date(attempt.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  {attempt.time_taken > 0 && (
+                    <span className="text-[10px] font-mono text-gray-400 bg-white px-2 py-1 rounded-md border shadow-sm">
+                      {formatTime(attempt.time_taken)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -21,18 +21,16 @@ export default async function QuestionPage({ params }: { params: Promise<{ quest
     return <div>Question not found or error loading it.</div>
   }
 
-  let previousAttempt = null
+  let attempts: any[] = []
   if (authUser.user) {
-    const { data: attempt } = await supabase
+    const { data: attemptList } = await supabase
       .from('attempts')
       .select('*')
       .eq('question_id', questionId)
       .eq('user_id', authUser.user.id)
       .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
     
-    if (attempt) previousAttempt = attempt
+    if (attemptList) attempts = attemptList
   }
 
   return (
@@ -48,7 +46,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ quest
       <QuestionView 
         question={question} 
         options={options || []} 
-        previousAttempt={previousAttempt} 
+        attempts={attempts} 
       />
     </div>
   )
