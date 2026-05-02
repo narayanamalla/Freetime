@@ -20,16 +20,23 @@ export async function submitAttempt(questionId: string, answer: string, timeTake
   let isCorrect = false
 
   if (question.type === 'mcq') {
-    // For MCQ: the answer is the option UUID. Check is_correct on that option directly.
     const { data: allOptions } = await supabase
       .from('question_options')
       .select('id, text, is_correct')
       .eq('question_id', questionId)
     
-    console.log(`[Submit] Question ${questionId} options:`, allOptions?.map(o => ({ text: o.text?.substring(0, 30), is_correct: o.is_correct })))
-    console.log(`[Submit] User selected option ID: ${answer}`)
+    // DEBUG: log everything so we can see the mismatch
+    console.log(`[Submit] questionId=${questionId}`)
+    console.log(`[Submit] question.correct_answer=${question.correct_answer}`)
+    console.log(`[Submit] User submitted answer (option UUID)="${answer}"`)
+    console.log(`[Submit] All options in DB:`, JSON.stringify(allOptions?.map(o => ({
+      id: o.id,
+      text: o.text?.substring(0, 20),
+      is_correct: o.is_correct
+    }))))
     
     const selectedOption = allOptions?.find(o => o.id === answer)
+    console.log(`[Submit] Matched option:`, selectedOption ? { id: selectedOption.id, is_correct: selectedOption.is_correct } : 'NOT FOUND')
     isCorrect = selectedOption?.is_correct === true
   } else {
     // For numerical: compare the text values
