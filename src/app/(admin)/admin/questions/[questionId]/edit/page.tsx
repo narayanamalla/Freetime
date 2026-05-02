@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import EditQuestionClient from './edit-client'
 
@@ -8,7 +8,7 @@ export default async function EditQuestionPage({
   params: Promise<{ questionId: string }>
 }) {
   const { questionId } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Fetch question and options
   const { data: question } = await supabase

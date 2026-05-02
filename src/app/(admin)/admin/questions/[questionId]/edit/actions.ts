@@ -45,34 +45,51 @@ export async function updateQuestion(questionId: string, formData: FormData) {
 
     if (type === 'mcq') {
       const correctIndex = parseInt(formData.get('correctOptionIndex') as string)
-      const optionsToUpsert = []
       
+      // Fetch existing options to get their stable IDs
+      const { data: existingOptions } = await supabase
+        .from('question_options')
+        .select('id')
+        .eq('question_id', questionId)
+        .order('id', { ascending: true })
+
+      const newOptions = []
       for (let i = 0; i < 4; i++) {
         const optText = formData.get(`option_${i}`) as string
-        const optId = formData.get(`option_id_${i}`) as string
-        
         if (optText) {
-          const opt: any = {
-            question_id: questionId,
+          newOptions.push({
             text: optText,
             is_correct: i === correctIndex
-          }
-          if (optId) opt.id = optId
-          optionsToUpsert.push(opt)
+          })
         }
       }
 
-      if (optionsToUpsert.length > 0) {
-        // Upsert options to avoid FK constraint violations from delete
-        const { error: optError } = await supabase.from('question_options').upsert(optionsToUpsert)
-        if (optError) {
-          return { error: 'Question updated but failed to save options: ' + optError.message }
-        }
-        
-        // Update correct_answer on question
-        const { data: savedOptions } = await supabase.from('question_options').select('id').eq('question_id', questionId).eq('is_correct', true).single()
-        if (savedOptions) {
-          await supabase.from('questions').update({ correct_answer: savedOptions.id }).eq('id', questionId)
+      if (newOptions.length > 0) {
+        if (existingOptions && existingOptions.length > 0) {
+          // Update each existing option in-place (preserves UUIDs — critical for attempts history)
+          let correctOptionId: string | null = null
+          for (let i = 0; i < newOptions.length; i++) {
+            const existingId = existingOptions[i]?.id
+            if (existingId) {
+              await supabase.from('question_options').update({
+                text: newOptions[i].text,
+                is_correct: newOptions[i].is_correct
+              }).eq('id', existingId)
+              if (newOptions[i].is_correct) correctOptionId = existingId
+            }
+          }
+          if (correctOptionId) {
+            await supabase.from('questions').update({ correct_answer: correctOptionId }).eq('id', questionId)
+          }
+        } else {
+          // No existing options — insert fresh
+          const toInsert = newOptions.map(o => ({ ...o, question_id: questionId }))
+          const { data: inserted, error: optError } = await supabase.from('question_options').insert(toInsert).select('id, is_correct')
+          if (optError) return { error: 'Failed to save options: ' + optError.message }
+          const correctOpt = inserted?.find(o => o.is_correct)
+          if (correctOpt) {
+            await supabase.from('questions').update({ correct_answer: correctOpt.id }).eq('id', questionId)
+          }
         }
       }
     }
