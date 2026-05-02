@@ -30,6 +30,8 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
     if (idx !== -1) initCorrectIndex = idx.toString()
   }
 
+  const [correctOptionState, setCorrectOptionState] = useState(initCorrectIndex)
+
   useEffect(() => {
     async function loadSubjects() {
       const { data } = await supabase.from('subjects').select('*').order('name')
@@ -148,7 +150,8 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
             {type === 'mcq' ? (
               <div className="space-y-4 border p-4 rounded-md">
                 <Label>Options & Correct Answer</Label>
-                <RadioGroup name="correctOptionIndex" defaultValue={initCorrectIndex}>
+                <input type="hidden" name="correctOptionIndex" value={correctOptionState} />
+                <RadioGroup value={correctOptionState} onValueChange={setCorrectOptionState}>
                   {[0, 1, 2, 3].map((index) => {
                     const opt = initialData.options?.[index]
                     return (
