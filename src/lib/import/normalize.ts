@@ -60,8 +60,12 @@ export function normalizeImportData(data: RawImportData[]): ImportQuestion[] {
       }
     }
 
-    const typeRaw = findValue(item, 'type', 'question type', 'question_type', 'questiontype') || 'mcq'
-    const type = typeRaw.toLowerCase() === 'numerical' ? 'numerical' : 'mcq'
+    const typeRaw = (findValue(item, 'type', 'question type', 'question_type', 'questiontype') || 'mcq').toLowerCase().trim()
+    // Accept any variant that signals a numerical / integer answer question
+    const NUMERICAL_VARIANTS = ['numerical', 'mcq_numerical', 'integer', 'integer type', 'integer_type', 'numeric', 'numericaltype']
+    const type = (NUMERICAL_VARIANTS.includes(typeRaw) || typeRaw.includes('numerical') || typeRaw.includes('integer'))
+      ? 'numerical'
+      : 'mcq'
 
     const correctAnswerRaw = findValue(item, 'correct_answer', 'correct answer', 'correctanswer', 'answer')
 
