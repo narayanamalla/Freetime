@@ -26,7 +26,7 @@ export default async function AdminDashboardPage({
     .range(offset, offset + pageSize - 1)
 
   if (error) {
-    return <div>Error loading questions: {error.message}</div>
+    return <div className="text-red-400">Error loading questions: {error.message}</div>
   }
 
   const totalPages = Math.ceil((totalCount || 0) / pageSize)
@@ -36,71 +36,67 @@ export default async function AdminDashboardPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Admin Question Management</h1>
-          <p className="text-sm text-gray-400 mt-1 font-medium">{totalCount || 0} total questions</p>
+          <h1 className="text-2xl font-extrabold text-foreground tracking-[-0.03em]">Question Management</h1>
+          <p className="text-sm text-muted mt-1">{totalCount || 0} total questions</p>
         </div>
         <div className="flex items-center gap-3">
           {(totalCount || 0) > 0 && <DeleteAllQuestionsButton count={totalCount || 0} />}
-          <Link href="/admin/import">
-            <Button variant="outline" className="text-sm h-10 rounded-xl border-gray-200 font-medium">
-              Import
-            </Button>
+          <Link href="/admin/import" className="inline-flex items-center justify-center h-8 px-4 text-sm font-medium rounded-pill border border-border-strong bg-transparent text-foreground hover:bg-surface-2 transition-colors">
+            Import
           </Link>
-          <Link href="/admin/questions/new">
-            <button className="h-10 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all active:scale-[0.98]">
-              <Plus className="h-4 w-4" />
-              Add Question
-            </button>
+          <Link href="/admin/questions/new" className="inline-flex items-center justify-center gap-2 h-8 px-4 text-sm font-medium rounded-pill bg-gradient-primary text-white shadow-[0_8px_24px_-6px_rgba(37,99,235,0.55)] hover:brightness-110 transition-all">
+            <Plus className="h-4 w-4" />
+            Add Question
           </Link>
         </div>
       </div>
 
       {/* Table */}
-      <div className="premium-card overflow-hidden" style={{ cursor: 'default' }}>
+      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">ID</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">Subject</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">Chapter</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider max-w-[280px]">Statement</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">Difficulty</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">Type</th>
-                <th className="text-left py-4 px-5 font-bold text-gray-400 text-[11px] uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-border bg-surface-2">
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">ID</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">Subject</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">Chapter</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider max-w-[280px]">Statement</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">Difficulty</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">Type</th>
+                <th className="text-left py-4 px-5 font-bold text-muted-2 text-[11px] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border">
               {questions?.map((q, idx) => {
                 const qId = `Q-${String((page - 1) * pageSize + idx + 1).padStart(3, '0')}`
                 const diffColor: Record<string, string> = {
-                  easy: 'bg-emerald-100 text-emerald-700',
-                  medium: 'bg-amber-100 text-amber-700',
-                  hard: 'bg-red-100 text-red-700',
+                  easy:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                  medium: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+                  hard:   'bg-red-500/10 text-red-400 border border-red-500/20',
                 }
 
                 return (
-                  <tr key={q.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="py-3.5 px-5 text-gray-400 font-mono text-xs font-medium">{qId}</td>
-                    <td className="py-3.5 px-5 text-gray-700 font-medium">
+                  <tr key={q.id} className="hover:bg-surface-2/60 transition-colors">
+                    <td className="py-3.5 px-5 text-muted-2 font-mono text-xs font-medium">{qId}</td>
+                    <td className="py-3.5 px-5 text-foreground font-medium">
                       {/* @ts-ignore */}
                       {q.chapters?.subjects?.name || '—'}
                     </td>
                     {/* @ts-ignore */}
-                    <td className="py-3.5 px-5 text-gray-600">{q.chapters?.name || '—'}</td>
-                    <td className="py-3.5 px-5 text-gray-600 max-w-[280px] truncate">{q.statement}</td>
+                    <td className="py-3.5 px-5 text-muted">{q.chapters?.name || '—'}</td>
+                    <td className="py-3.5 px-5 text-muted max-w-[280px] truncate">{q.statement}</td>
                     <td className="py-3.5 px-5">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${diffColor[q.difficulty] || 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold capitalize ${diffColor[q.difficulty] || 'bg-surface-2 text-muted border border-border'}`}>
                         {q.difficulty}
                       </span>
                     </td>
-                    <td className="py-3.5 px-5 text-gray-500 uppercase text-xs font-bold">{q.type}</td>
+                    <td className="py-3.5 px-5 text-muted-2 uppercase text-xs font-bold">{q.type}</td>
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-3">
-                        <Link href={`/questions/${q.id}`} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold">
+                        <Link href={`/questions/${q.id}`} className="text-accent-cyan hover:text-accent-glow text-xs font-bold transition-colors">
                           View
                         </Link>
-                        <Link href={`/admin/questions/${q.id}/edit`} className="text-amber-600 hover:text-amber-800 text-xs font-bold">
+                        <Link href={`/admin/questions/${q.id}/edit`} className="text-amber-400 hover:text-amber-300 text-xs font-bold transition-colors">
                           Edit
                         </Link>
                         <DeleteQuestionButton questionId={q.id} />
@@ -115,24 +111,24 @@ export default async function AdminDashboardPage({
 
         {questions?.length === 0 && (
           <div className="py-16 text-center">
-            <div className="icon-3d p-4 text-white w-fit mx-auto mb-4">
+            <div className="size-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">📝</span>
             </div>
-            <p className="text-gray-400 font-medium">No questions yet.</p>
+            <p className="text-muted font-medium">No questions yet.</p>
           </div>
         )}
 
         {/* Pagination */}
         {(totalCount || 0) > 0 && (
-          <div className="flex items-center justify-between px-5 py-4 border-t border-gray-100">
-            <span className="text-xs text-gray-400 font-medium">
+          <div className="flex items-center justify-between px-5 py-4 border-t border-border bg-surface-2/40">
+            <span className="text-xs text-muted-2 font-medium">
               Page {page} of {totalPages}
             </span>
             <div className="flex items-center gap-1">
               {page > 1 && (
                 <Link href={`/admin?page=${page - 1}`}>
-                  <button className="h-8 w-8 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors">
-                    <ChevronLeft className="h-4 w-4 text-gray-400" />
+                  <button className="size-8 rounded-xl hover:bg-surface-2 flex items-center justify-center transition-colors">
+                    <ChevronLeft className="h-4 w-4 text-muted" />
                   </button>
                 </Link>
               )}
@@ -144,10 +140,10 @@ export default async function AdminDashboardPage({
                 else p = page - 3 + i
                 return (
                   <Link key={p} href={`/admin?page=${p}`}>
-                    <button className={`h-8 w-8 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${
+                    <button className={`size-8 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${
                       p === page
-                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/25'
-                        : 'text-gray-400 hover:bg-gray-100'
+                        ? 'bg-gradient-primary text-white shadow-[0_4px_12px_-4px_rgba(37,99,235,0.5)]'
+                        : 'text-muted hover:bg-surface-2'
                     }`}>
                       {p}
                     </button>
@@ -156,8 +152,8 @@ export default async function AdminDashboardPage({
               })}
               {page < totalPages && (
                 <Link href={`/admin?page=${page + 1}`}>
-                  <button className="h-8 w-8 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors">
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  <button className="size-8 rounded-xl hover:bg-surface-2 flex items-center justify-center transition-colors">
+                    <ChevronRight className="h-4 w-4 text-muted" />
                   </button>
                 </Link>
               )}

@@ -69,22 +69,22 @@ export function ImportDropzone({ onParsed }: ImportDropzoneProps) {
 
   return (
     <Card 
-      className={`border-2 border-dashed transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700'}`}
+      className={`border-2 border-dashed transition-all premium-card bg-black/40 ${isDragging ? 'border-cyan-500 shadow-[inset_0_0_30px_rgba(6,182,212,0.1)]' : 'border-white/10 hover:border-white/20'}`}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
-        <div className="p-4 bg-gray-100 dark:bg-zinc-800 rounded-full">
-          <UploadCloud className="w-8 h-8 text-gray-500" />
+      <CardContent className="flex flex-col items-center justify-center py-16 space-y-5">
+        <div className={`p-5 rounded-full transition-colors ${isDragging ? 'bg-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.3)]' : 'bg-white/5 border border-white/10'}`}>
+          <UploadCloud className={`w-10 h-10 ${isDragging ? 'text-cyan-400' : 'text-white/40'}`} />
         </div>
         <div className="text-center">
-          <h3 className="font-semibold text-lg">Upload Questions</h3>
-          <p className="text-sm text-gray-500 mt-1">Drag and drop a JSON or CSV file here, or click to select.</p>
+          <h3 className="font-extrabold text-xl text-white tracking-tight">Upload Questions</h3>
+          <p className="text-sm text-white/50 mt-1.5 font-medium">Drag and drop a JSON or CSV file here, or click to select.</p>
         </div>
         
         {error && (
-          <p className="text-sm text-red-500 font-medium">{error}</p>
+          <p className="text-sm text-red-400 font-bold bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20">{error}</p>
         )}
 
         <input 
@@ -94,7 +94,11 @@ export function ImportDropzone({ onParsed }: ImportDropzoneProps) {
           ref={fileInputRef}
           onChange={(e) => e.target.files && handleFile(e.target.files[0])}
         />
-        <Button onClick={() => fileInputRef.current?.click()} variant="outline">
+        <Button 
+          onClick={() => fileInputRef.current?.click()} 
+          variant="outline" 
+          className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white font-bold h-11 px-6 rounded-xl transition-all"
+        >
           Select File
         </Button>
       </CardContent>

@@ -56,14 +56,14 @@ export default function ImportPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Bulk Import Questions</h1>
-        <p className="text-gray-500">Upload a JSON or CSV file to add multiple questions at once.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white">Bulk Import Questions</h1>
+        <p className="text-white/50 font-medium">Upload a JSON or CSV file to add multiple questions at once.</p>
       </div>
 
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+        <Alert className="bg-red-500/10 border-red-500/20 text-red-400">
+          <AlertCircle className="h-4 w-4 text-red-400" />
+          <AlertTitle className="font-bold">Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -72,8 +72,8 @@ export default function ImportPage() {
         <div className="relative">
           <ImportDropzone onParsed={handleParsed} />
           {isProcessing && (
-            <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center backdrop-blur-sm rounded-lg">
-              <span className="font-medium animate-pulse">Processing data...</span>
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-md rounded-xl z-10">
+              <span className="font-bold text-cyan-400 animate-pulse drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">Processing data...</span>
             </div>
           )}
         </div>
@@ -90,32 +90,32 @@ export default function ImportPage() {
 
       {step === 'result' && insertResult && (
         <div className="space-y-6">
-          <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-800 dark:text-green-400">Import Complete</AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-500">
+          <Alert className="bg-emerald-500/10 border-emerald-500/20 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <AlertTitle className="text-emerald-400 font-bold">Import Complete</AlertTitle>
+            <AlertDescription className="text-emerald-500/80">
               Successfully processed the import batch.
             </AlertDescription>
           </Alert>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg text-center bg-white dark:bg-zinc-950">
-              <div className="text-2xl font-bold text-green-600">{insertResult.insertedCount}</div>
-              <div className="text-sm text-gray-500">Inserted</div>
+          <div className="grid grid-cols-3 gap-5">
+            <div className="p-5 border border-white/5 rounded-2xl text-center bg-black/40 premium-card">
+              <div className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{insertResult.insertedCount}</div>
+              <div className="text-sm text-white/50 font-medium mt-1">Inserted</div>
             </div>
-            <div className="p-4 border rounded-lg text-center bg-white dark:bg-zinc-950">
-              <div className="text-2xl font-bold text-orange-600">{insertResult.skippedCount}</div>
-              <div className="text-sm text-gray-500">Skipped (Dupes)</div>
+            <div className="p-5 border border-white/5 rounded-2xl text-center bg-black/40 premium-card">
+              <div className="text-3xl font-black text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]">{insertResult.skippedCount}</div>
+              <div className="text-sm text-white/50 font-medium mt-1">Skipped (Dupes)</div>
             </div>
-            <div className="p-4 border rounded-lg text-center bg-white dark:bg-zinc-950">
-              <div className="text-2xl font-bold text-red-600">{insertResult.errorCount}</div>
-              <div className="text-sm text-gray-500">Errors</div>
+            <div className="p-5 border border-white/5 rounded-2xl text-center bg-black/40 premium-card">
+              <div className="text-3xl font-black text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.3)]">{insertResult.errorCount}</div>
+              <div className="text-sm text-white/50 font-medium mt-1">Errors</div>
             </div>
           </div>
 
           <div className="flex gap-4">
             <button 
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm rounded-xl hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all active:scale-[0.98]"
               onClick={() => {
                 setStep('upload')
                 setPreviewData(null)
@@ -124,7 +124,7 @@ export default function ImportPage() {
             >
               Import Another File
             </button>
-            <Link href="/admin" className="px-4 py-2 border rounded hover:bg-gray-50 dark:hover:bg-zinc-800">
+            <Link href="/admin" className="px-5 py-2.5 bg-white/5 border border-white/10 text-white/80 font-bold text-sm rounded-xl hover:bg-white/10 hover:text-white transition-all">
               Back to Dashboard
             </Link>
           </div>

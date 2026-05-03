@@ -36,8 +36,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ quest
   return (
     <div className="space-y-4">
       <div>
-        {/* @ts-ignore */}
-        <Link href={`/chapters/${question?.chapters?.id}`} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
+        <Link href={`/chapters/${question?.chapters?.id}`} className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white mb-4 transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to {question?.chapters?.name}
         </Link>

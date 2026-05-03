@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { submitAttempt } from './actions'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp, Eye, EyeOff, RotateCcw, History } from 'lucide-react'
@@ -18,7 +17,7 @@ type QuestionViewProps = {
 export default function QuestionView({ question, options, attempts: initialAttempts }: QuestionViewProps) {
   const [attempts, setAttempts] = useState<any[]>(initialAttempts)
   const latestAttempt = attempts.length > 0 ? attempts[0] : null
-  
+
   const [practiceMode, setPracticeMode] = useState<boolean>(attempts.length === 0)
   const [selectedOption, setSelectedOption] = useState<string>('')
   const [numericalAnswer, setNumericalAnswer] = useState<string>('')
@@ -26,11 +25,9 @@ export default function QuestionView({ question, options, attempts: initialAttem
   const [result, setResult] = useState<{ success?: boolean; isCorrect?: boolean; error?: string } | null>(null)
   const [timeTaken, setTimeTaken] = useState(0)
   const [showHint, setShowHint] = useState(false)
-  const [showExplanation, setShowExplanation] = useState(false) // default hidden for practice mode
+  const [showExplanation, setShowExplanation] = useState(false)
 
-  // If we are not in practice mode, the question is effectively "solved" (or at least attempted)
   const isSolved = !practiceMode && (result?.isCorrect || latestAttempt?.is_correct)
-  // Only show explanation if they actually got it right
   const showSolution = !practiceMode && (result?.isCorrect || latestAttempt?.is_correct)
 
   useEffect(() => {
@@ -45,10 +42,8 @@ export default function QuestionView({ question, options, attempts: initialAttem
     setIsSubmitting(true)
     const res = await submitAttempt(question.id, answer, timeTaken)
     setResult(res)
-    
-    // Add to attempts locally so it shows in history immediately
     const newAttempt = {
-      id: Math.random().toString(), // temp ID
+      id: Math.random().toString(),
       answer,
       is_correct: res.isCorrect,
       time_taken: timeTaken,
@@ -71,51 +66,51 @@ export default function QuestionView({ question, options, attempts: initialAttem
   const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
 
   const diffMap: Record<string, string> = {
-    easy: 'bg-emerald-100 text-emerald-700',
-    medium: 'bg-amber-100 text-amber-700',
-    hard: 'bg-red-100 text-red-700',
+    easy:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    medium: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    hard:   'bg-red-500/10 text-red-400 border border-red-500/20',
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 animate-in-up">
+    <div className="flex flex-col lg:flex-row gap-6">
       {/* Left: Question */}
       <div className="flex-1 space-y-5">
-        <div className="premium-card p-7" style={{ cursor: 'default' }}>
+        <div className="rounded-2xl border border-border bg-surface p-7">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">
+              <h1 className="text-xl font-extrabold text-foreground tracking-[-0.03em]">
                 {question.chapters?.name || 'Practice Question'}
               </h1>
               <div className="flex flex-wrap gap-2 mt-2.5">
                 {question.chapters?.subjects?.name && (
-                  <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-semibold text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/20 px-2.5 py-1 rounded-pill">
                     {question.chapters.subjects.name}
                   </span>
                 )}
                 {question.chapters?.name && (
-                  <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-semibold text-muted bg-surface-2 border border-border px-2.5 py-1 rounded-pill">
                     {question.chapters.name}
                   </span>
                 )}
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${diffMap[question.difficulty] || 'bg-gray-100 text-gray-600'}`}>
+            <span className={`px-3 py-1 rounded-pill text-xs font-bold capitalize ${diffMap[question.difficulty] || 'bg-surface-2 text-muted border border-border'}`}>
               {question.difficulty}
             </span>
           </div>
 
-          <div className="text-[15px] text-gray-700 leading-relaxed">
+          <div className="text-[15px] text-muted leading-relaxed">
             <Latex>{question.statement}</Latex>
           </div>
 
           {question.hint && (
-            <div className="mt-5 pt-5 border-t border-gray-100">
-              <button onClick={() => setShowHint(!showHint)} className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-semibold">
+            <div className="mt-5 pt-5 border-t border-border">
+              <button onClick={() => setShowHint(!showHint)} className="flex items-center gap-2 text-sm text-accent-cyan hover:text-accent-glow font-semibold transition-colors">
                 {showHint ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 {showHint ? 'Hide Hint' : 'Show Hint'}
               </button>
               {showHint && (
-                <div className="mt-3 text-sm text-indigo-700 bg-indigo-50 rounded-xl p-4">
+                <div className="mt-3 text-sm text-accent-cyan bg-accent-cyan/5 border border-accent-cyan/20 rounded-xl p-4">
                   <Latex>{question.hint}</Latex>
                 </div>
               )}
@@ -125,13 +120,13 @@ export default function QuestionView({ question, options, attempts: initialAttem
 
         {/* Explanation */}
         {showSolution && (
-          <div className="premium-card overflow-hidden" style={{ cursor: 'default' }}>
-            <button onClick={() => setShowExplanation(!showExplanation)} className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 transition-colors">
-              <span className="font-bold text-gray-900">Explanation</span>
-              {showExplanation ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
+          <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+            <button onClick={() => setShowExplanation(!showExplanation)} className="w-full flex items-center justify-between p-5 text-left hover:bg-surface-2 transition-colors">
+              <span className="font-bold text-foreground">Explanation</span>
+              {showExplanation ? <ChevronUp className="h-4 w-4 text-muted-2" /> : <ChevronDown className="h-4 w-4 text-muted-2" />}
             </button>
             {showExplanation && (
-              <div className="px-6 pb-6 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+              <div className="px-6 pb-6 text-sm text-muted leading-relaxed border-t border-border pt-4">
                 <Latex>{question.solution || "No detailed solution provided for this question."}</Latex>
               </div>
             )}
@@ -141,133 +136,122 @@ export default function QuestionView({ question, options, attempts: initialAttem
 
       {/* Right: Answer Panel */}
       <div className="lg:w-[380px] shrink-0 space-y-5">
-        <div className="premium-card p-6 sticky top-[90px]" style={{ cursor: 'default' }}>
+        <div className="rounded-2xl border border-border bg-surface p-6 sticky top-[90px]">
           {/* Timer */}
           {practiceMode && (
             <div className="flex items-center justify-end gap-2 mb-5">
-              <div className="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full">
-                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="flex items-center gap-1.5 bg-surface-2 border border-border px-3 py-1.5 rounded-pill">
+                <svg className="w-3.5 h-3.5 text-muted-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-xs font-mono font-bold text-gray-600">Time: {formatTime(timeTaken)}</span>
+                <span className="text-xs font-mono font-bold text-muted">Time: {formatTime(timeTaken)}</span>
               </div>
             </div>
           )}
 
-          <h3 className="font-bold text-gray-900 mb-4">Your Answer</h3>
+          <h3 className="font-bold text-foreground mb-4">Your Answer</h3>
 
           {question.type === 'mcq' ? (
             <RadioGroup value={practiceMode ? selectedOption : (latestAttempt?.answer || '')} onValueChange={setSelectedOption} disabled={!practiceMode}>
               <div className="space-y-2.5">
-                {options.map((opt, idx) => {
+                {options.map((opt) => {
                   const isSelected = practiceMode ? selectedOption === opt.id : latestAttempt?.answer === opt.id
                   const showCorrectness = !practiceMode
                   const isCorrectSubmission = latestAttempt?.is_correct || result?.isCorrect
 
-                  let border = 'border-gray-150 hover:border-indigo-200 hover:bg-indigo-50/30'
-                  if (isSelected && !showCorrectness) border = 'border-indigo-400 bg-indigo-50 ring-2 ring-indigo-100'
-                  
-                  // Only highlight the correct answer in green if they actually got the question right
-                  if (showCorrectness && opt.is_correct && isCorrectSubmission) border = 'border-emerald-400 bg-emerald-50'
-                  
-                  // If they got it wrong, highlight their wrong choice in red
-                  if (showCorrectness && isSelected && !opt.is_correct) border = 'border-red-300 bg-red-50'
+                  let border = 'border-border hover:border-accent-cyan/50 hover:bg-accent-cyan/5 text-muted'
+                  if (isSelected && !showCorrectness) border = 'border-accent-cyan bg-accent-cyan/10 ring-2 ring-accent-cyan/20 text-foreground'
+                  if (showCorrectness && opt.is_correct && isCorrectSubmission) border = 'border-emerald-500 bg-emerald-500/10 text-emerald-100'
+                  if (showCorrectness && isSelected && !opt.is_correct) border = 'border-red-500 bg-red-500/10 text-red-100'
 
                   return (
-                    <div key={opt.id} className={`flex items-center gap-3 p-3.5 border rounded-2xl transition-all cursor-pointer ${border}`}>
-                      <RadioGroupItem value={opt.id} id={opt.id} className="shrink-0" />
-                      <Label htmlFor={opt.id} className="flex-1 cursor-pointer text-sm text-gray-700 font-medium"><Latex>{opt.text}</Latex></Label>
-                      {showCorrectness && opt.is_correct && isCorrectSubmission && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
-                      {showCorrectness && isSelected && !opt.is_correct && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
+                    <div key={opt.id} className={`flex items-center gap-3 p-3.5 border rounded-xl transition-all cursor-pointer ${border}`}>
+                      <RadioGroupItem value={opt.id} id={opt.id} className="shrink-0 border-border-strong text-accent-cyan" />
+                      <Label htmlFor={opt.id} className="flex-1 cursor-pointer text-sm font-medium"><Latex>{opt.text}</Latex></Label>
+                      {showCorrectness && opt.is_correct && isCorrectSubmission && <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />}
+                      {showCorrectness && isSelected && !opt.is_correct && <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
                     </div>
                   )
                 })}
               </div>
             </RadioGroup>
           ) : (
-            <Input
+            <input
               type="text"
               placeholder="Enter numerical value"
               value={practiceMode ? numericalAnswer : (latestAttempt?.answer || '')}
               onChange={(e) => setNumericalAnswer(e.target.value)}
               disabled={!practiceMode}
-              className="h-12 rounded-xl text-base"
+              className="w-full h-12 rounded-xl bg-surface-2 border border-border px-4 text-foreground placeholder:text-muted-2 focus:border-accent-glow focus:outline-none focus:ring-2 focus:ring-accent-glow/30 transition text-base"
             />
           )}
 
           {practiceMode && (
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={isSubmitting || (question.type === 'mcq' ? !selectedOption : !numericalAnswer)}
-              className="w-full mt-5 h-12 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-sm hover:from-indigo-700 hover:to-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-[0.98]"
+              variant="primary"
+              className="w-full mt-5"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-            </button>
+              {isSubmitting ? 'Submitting…' : 'Submit Answer'}
+            </Button>
           )}
 
           {!practiceMode && (
-            <div className={`mt-5 p-4 rounded-2xl flex items-center gap-3 ${
+            <div className={`mt-5 p-4 rounded-xl flex items-center gap-3 border ${
               latestAttempt?.is_correct
-                ? 'bg-emerald-50 border border-emerald-200'
-                : 'bg-red-50 border border-red-200'
+                ? 'bg-emerald-500/10 border-emerald-500/20'
+                : 'bg-red-500/10 border-red-500/20'
             }`}>
               {latestAttempt?.is_correct
-                ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                : <XCircle className="h-5 w-5 text-red-500" />
+                ? <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                : <XCircle className="h-5 w-5 text-red-400" />
               }
               <div className="flex-1">
-                <p className={`text-sm font-bold ${
-                  latestAttempt?.is_correct ? 'text-emerald-700' : 'text-red-700'
-                }`}>
+                <p className={`text-sm font-bold ${latestAttempt?.is_correct ? 'text-emerald-400' : 'text-red-400'}`}>
                   {latestAttempt?.is_correct ? 'Correct Answer!' : 'Incorrect Answer'}
                 </p>
-                <p className={`text-[11px] mt-0.5 ${
-                  latestAttempt?.is_correct ? 'text-emerald-500' : 'text-red-400'
-                }`}>
-                  {latestAttempt?.is_correct ? 'Great job!' : 'Don\'t give up, try again!'}
+                <p className={`text-[11px] mt-0.5 ${latestAttempt?.is_correct ? 'text-emerald-500/80' : 'text-red-400/80'}`}>
+                  {latestAttempt?.is_correct ? 'Great job!' : "Don't give up, try again!"}
                 </p>
               </div>
             </div>
           )}
 
           {!practiceMode && (
-            <button
-              onClick={handlePracticeAgain}
-              className="w-full mt-4 h-11 rounded-xl border-2 border-indigo-100 bg-white text-indigo-600 font-bold text-sm hover:bg-indigo-50 hover:border-indigo-200 transition-all flex items-center justify-center gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
+            <Button variant="outline" onClick={handlePracticeAgain} className="w-full mt-4">
+              <RotateCcw className="h-4 w-4 mr-2" />
               {latestAttempt?.is_correct ? 'Practice Again' : 'Try Again'}
-            </button>
+            </Button>
           )}
         </div>
 
-        {/* Submissions History */}
+        {/* History */}
         {attempts.length > 0 && (
-          <div className="premium-card p-6" style={{ cursor: 'default' }}>
+          <div className="rounded-2xl border border-border bg-surface p-6">
             <div className="flex items-center gap-2 mb-4">
-              <History className="h-4 w-4 text-gray-400" />
-              <h3 className="font-bold text-gray-900 text-sm">Previous Submissions</h3>
+              <History className="h-4 w-4 text-muted-2" />
+              <h3 className="font-bold text-foreground text-sm">Previous Submissions</h3>
             </div>
             <div className="space-y-2">
               {attempts.map((attempt, idx) => (
-                <div key={attempt.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
+                <div key={attempt.id || idx} className="flex items-center justify-between p-3 rounded-xl bg-surface-2 border border-border hover:border-border-strong transition-colors">
                   <div className="flex items-center gap-3">
-                    {attempt.is_correct ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-400" />
-                    )}
+                    {attempt.is_correct
+                      ? <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                      : <XCircle className="h-4 w-4 text-red-400" />
+                    }
                     <div>
-                      <p className="text-xs font-semibold text-gray-700">
+                      <p className="text-xs font-semibold text-foreground">
                         {attempt.is_correct ? 'Accepted' : 'Wrong Answer'}
                       </p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">
+                      <p className="text-[10px] text-muted-2 mt-0.5">
                         {new Date(attempt.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
                   {attempt.time_taken > 0 && (
-                    <span className="text-[10px] font-mono text-gray-400 bg-white px-2 py-1 rounded-md border shadow-sm">
+                    <span className="text-[10px] font-mono text-muted-2 bg-surface border border-border px-2 py-1 rounded-md">
                       {formatTime(attempt.time_taken)}
                     </span>
                   )}
