@@ -86,7 +86,7 @@ export async function createCustomSession(config: CustomTestConfig) {
 
   if (sqErr) return { error: sqErr.message }
 
-  redirect(`/tests/${session.id}`)
+  redirect(`/tests/${session.id}/instructions`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ export async function createJeeSession() {
 
   if (sqErr) return { error: sqErr.message }
 
-  redirect(`/tests/${session.id}`)
+  redirect(`/tests/${session.id}/instructions`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -93,48 +93,77 @@ export default function TestClient({ session, sessionQuestions: initial }: Props
     return 'not_answered'
   }
 
-  const navigateTo = useCallback(async (idx: number) => {
+  const navigateTo = useCallback(async (idx: number, overrides?: { answer?: string; marked?: boolean }) => {
     if (idx === currentIdx || idx < 0 || idx >= sq.length) return
 
     const cur = sq[currentIdx]
-    const answer = localAnswer
-    const isMarked = cur.is_marked_for_review
+    const answer = overrides && 'answer' in overrides ? overrides.answer! : localAnswer
+    const isMarked = overrides && 'marked' in overrides ? overrides.marked! : cur.is_marked_for_review
     const visitStatus = computeVisitStatus(answer, isMarked)
     const timeTaken = cur.time_taken + questionTimerRef.current
 
-    // Optimistic update
+    // Optimistic update of the palette for the current question
     setSq(prev => prev.map((q, i) =>
       i === currentIdx
-        ? { ...q, answer_given: answer || null, visit_status: visitStatus, time_taken: timeTaken }
+        ? { ...q, answer_given: answer || null, visit_status: visitStatus, time_taken: timeTaken, is_marked_for_review: isMarked }
         : q
     ))
 
-    // Mark next question as not_answered if not_visited
+    // Await the save to give the user the visual feel of "save/mark first, then move"
+    await saveAnswer({
+      sessionQuestionId: cur.id,
+      answer: answer || null,
+      isMarked,
+      timeTaken,
+    })
+
+    // Now update the next question's status and perform the navigation
     setSq(prev => prev.map((q, i) =>
       i === idx && q.visit_status === 'not_visited'
         ? { ...q, visit_status: 'not_answered' }
         : q
     ))
 
+    setLocalAnswer(sq[idx].answers?.[0]?.option_id || sq[idx].answers?.[0]?.value || '')
     setCurrentIdx(idx)
+    questionTimerRef.current = 0
+  }, [currentIdx, sq, localAnswer])
 
-    // Persist
+  const handleClear = () => {
+    setLocalAnswer('')
+    const cur = sq[currentIdx]
+    
+    // Immediately update palette so user sees it change to 'not_answered'
+    setSq(prev => prev.map((q, i) =>
+      i === currentIdx ? { 
+        ...q, 
+        is_marked_for_review: false,
+        visit_status: 'not_answered',
+        answer_given: null
+      } : q
+    ))
+
+    // Persist the clear immediately
     startTransition(async () => {
       await saveAnswer({
         sessionQuestionId: cur.id,
-        answer: answer || null,
-        isMarked,
-        timeTaken,
+        answer: null,
+        isMarked: false,
+        timeTaken: cur.time_taken + questionTimerRef.current,
       })
     })
-  }, [currentIdx, sq, localAnswer, startTransition])
-
-  const handleClear = () => setLocalAnswer('')
+  }
 
   const handleMarkToggle = () => {
     const newMarked = !currentSq.is_marked_for_review
     setSq(prev => prev.map((q, i) =>
       i === currentIdx ? { ...q, is_marked_for_review: newMarked } : q
+    ))
+  }
+
+  const handleSetMark = (marked: boolean) => {
+    setSq(prev => prev.map((q, i) =>
+      i === currentIdx ? { ...q, is_marked_for_review: marked } : q
     ))
   }
 
@@ -192,6 +221,7 @@ export default function TestClient({ session, sessionQuestions: initial }: Props
     onAnswerChange: setLocalAnswer,
     onClear: handleClear,
     onMarkToggle: handleMarkToggle,
+    onSetMark: handleSetMark,
     onShowSubmit: () => setShowSubmitModal(true),
     onHideSubmit: () => setShowSubmitModal(false),
     onSubmit: () => handleSubmit(false),

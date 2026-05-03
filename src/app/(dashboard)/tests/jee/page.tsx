@@ -211,8 +211,8 @@ export default async function JeeMockPage() {
         Questions will be randomly picked from the question bank each time. The interface replicates the official NTA exam portal.
       </div>
 
-      {/* Start Button */}
-      <JeeStartButton disabled={!canStart} />
+      {/* Start Button Link */}
+      <JeeStartButton disabled={!canStart} label="Proceed to Instructions" />
     </div>
   )
 }
