@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { logout } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
-import { BookOpen, LayoutDashboard, GraduationCap, Bookmark, FlaskConical, Bell, Terminal } from 'lucide-react'
+import { BookOpen, LayoutDashboard, GraduationCap, Bookmark, FlaskConical, Bell, Terminal, ClipboardList } from 'lucide-react'
 
 export default async function DashboardLayout({
   children,
@@ -36,7 +36,7 @@ export default async function DashboardLayout({
           <SidebarLink href="/dashboard" icon={<LayoutDashboard className="h-[18px] w-[18px]" />} label="Dashboard" />
           <SidebarLink href="/subjects" icon={<BookOpen className="h-[18px] w-[18px]" />} label="Subjects" />
           <SidebarLink href="/subjects" icon={<FlaskConical className="h-[18px] w-[18px]" />} label="Practice" />
-          <SidebarLink href="/subjects" icon={<GraduationCap className="h-[18px] w-[18px]" />} label="Tests" disabled />
+          <SidebarLink href="/tests" icon={<ClipboardList className="h-[18px] w-[18px]" />} label="Tests" />
           <SidebarLink href="/subjects" icon={<Bookmark className="h-[18px] w-[18px]" />} label="Bookmarks" disabled />
         </nav>
 
