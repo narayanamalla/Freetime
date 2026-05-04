@@ -7,6 +7,29 @@ import Link from 'next/link'
 import { BarChart3, BookOpen, ClipboardList, Flame, FlaskConical, Target, Timer, TrendingUp } from 'lucide-react'
 import { Card, DifficultyBadge, FloatingButton, GridItem, SectionHeader } from '@/components/site/dashboard-ui'
 
+type WeekDay = {
+  label: string
+  date?: string
+  count: number
+  isToday?: boolean
+}
+
+type DashboardClientProps = {
+  userAttempts: any[]
+  sp: Record<string, { total: number; solved: number }>
+  totalSolved: number
+  totalQ: number
+  pct: number
+  accuracy: number
+  hrs: number
+  mns: number
+  display: string
+  inProgress: number
+  streak: number
+  weekDays: WeekDay[]
+  maxBar: number
+}
+
 export default function DashboardClient({
   userAttempts,
   sp,
@@ -21,7 +44,7 @@ export default function DashboardClient({
   streak,
   weekDays,
   maxBar,
-}: any) {
+}: DashboardClientProps) {
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -53,7 +76,7 @@ export default function DashboardClient({
   useEffect(() => {
     if (analyticsSection !== 'analytics') return
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    document.getElementById('analytics')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' })
+    document.getElementById('analytics')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' })
   }, [analyticsSection])
 
   return (
@@ -185,8 +208,8 @@ export default function DashboardClient({
               </div>
             </div>
             <div className="grid grid-cols-7 gap-3 items-end">
-              {weekDays.map((day: any, index: number) => (
-                <div key={day.label + index} className="flex flex-col items-center gap-2">
+              {weekDays.map((day, index) => (
+                <div key={`${day.label}-${day.date ?? index}`} className="flex flex-col items-center gap-2">
                   <div className="flex h-20 w-full items-end">
                     <div
                       className="w-full rounded-xl bg-[#3B82F6]/30"

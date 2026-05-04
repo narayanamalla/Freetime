@@ -94,6 +94,7 @@ type DifficultyBadgeProps = {
 
 export function DifficultyBadge({ level, className }: DifficultyBadgeProps) {
   const key = level?.toLowerCase() ?? ''
+  const ariaLabel = level ? `${level} difficulty` : 'Mixed difficulty'
   const styles =
     key === 'easy'
       ? 'bg-[#84CC16]/15 text-[#BEF264] border-[#84CC16]/30'
@@ -104,7 +105,10 @@ export function DifficultyBadge({ level, className }: DifficultyBadgeProps) {
           : 'bg-surface-2 text-muted border-border'
 
   return (
-    <span className={cn('rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]', styles, className)}>
+    <span
+      aria-label={ariaLabel}
+      className={cn('rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]', styles, className)}
+    >
       {level || 'mixed'}
     </span>
   )

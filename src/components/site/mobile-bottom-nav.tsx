@@ -15,9 +15,10 @@ const items = [
 export function MobileBottomNav() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const hideOnTests = pathname.startsWith('/tests')
   const analyticsActive = pathname === '/dashboard' && searchParams.get('section') === 'analytics'
 
-  if (pathname.startsWith('/tests')) return null
+  if (hideOnTests) return null
 
   return (
     <nav className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,420px)] -translate-x-1/2 rounded-3xl border border-white/[0.08] bg-surface/90 px-3 py-2 shadow-2xl backdrop-blur-md md:hidden">
