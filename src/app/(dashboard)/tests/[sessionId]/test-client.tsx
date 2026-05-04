@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveAnswer, submitTest } from '../actions'
-import JeeInterface from './jee-interface'
-import CustomInterface from './custom-interface'
+import ExamInterface from './exam-interface'
 
 export type SessionQuestion = {
   id: string
@@ -117,12 +116,7 @@ export default function TestClient({ session, sessionQuestions: initial }: Props
       timeTaken,
     })
 
-    // Now update the next question's status and perform the navigation
-    setSq(prev => prev.map((q, i) =>
-      i === idx && q.visit_status === 'not_visited'
-        ? { ...q, visit_status: 'not_answered' }
-        : q
-    ))
+    // Perform the navigation
 
     setLocalAnswer(sq[idx]?.answer_given ?? '')
     setCurrentIdx(idx)
@@ -227,6 +221,5 @@ export default function TestClient({ session, sessionQuestions: initial }: Props
     onSubmit: () => handleSubmit(false),
   }
 
-  if (isJee) return <JeeInterface {...sharedProps} />
-  return <CustomInterface {...sharedProps} />
+  return <ExamInterface {...sharedProps} />
 }

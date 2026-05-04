@@ -60,7 +60,7 @@ function groupBySubject(sq: SessionQuestion[]) {
   return Object.values(groups)
 }
 
-export default function CustomInterface({
+export default function ExamInterface({
   session, sq, currentIdx, currentSq, currentQ, localAnswer, timeLeft,
   showSubmitModal, isSubmitting, stats,
   onNavigate, onAnswerChange, onClear, onSetMark, onShowSubmit, onHideSubmit, onSubmit,
@@ -92,9 +92,6 @@ export default function CustomInterface({
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
-      if (document.exitFullscreen && document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {})
-      }
     }
   }, [])
 
@@ -258,9 +255,9 @@ export default function CustomInterface({
             )}
           </div>
 
-          {/* Bottom Action Row — two rows */}
+          {/* Bottom Action Row — two rows: primary buttons on top, nav on bottom */}
           <div className="px-5 py-3 border-t border-[#333] bg-[#242424] flex-shrink-0 space-y-2">
-            {/* Row 1: Action buttons */}
+            {/* Row 1: Save & Next + Clear + Mark buttons */}
             <div className="flex items-center gap-2">
               <button
                 onClick={onClear}
@@ -282,9 +279,13 @@ export default function CustomInterface({
               </button>
               <button
                 onClick={handleSaveAndNext}
-                className="ml-auto px-6 py-2 bg-[#28a745] text-white font-bold text-[12px] rounded-[4px] hover:bg-[#218838] transition-colors uppercase border border-[#218838] whitespace-nowrap"
+                className={`ml-auto py-2 min-w-[130px] px-4 text-white font-bold text-[12px] rounded-[4px] transition-colors uppercase border whitespace-nowrap text-center ${
+                  localAnswer.trim() !== ''
+                    ? 'bg-[#28a745] hover:bg-[#218838] border-[#218838]'
+                    : 'bg-[#555] hover:bg-[#666] border-[#555]'
+                }`}
               >
-                Save &amp; Next
+                {localAnswer.trim() !== '' ? 'Save & Next' : 'Next'}
               </button>
             </div>
             {/* Row 2: Back */}
@@ -364,7 +365,7 @@ export default function CustomInterface({
                   const i = item.globalIdx
                   const isActive = i === currentIdx
                   const styleClasses = getShapeClasses(s.visit_status)
-                  
+
                   return (
                     <button
                       key={s.id}
