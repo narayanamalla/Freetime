@@ -124,7 +124,7 @@ export default function TestClient({ session, sessionQuestions: initial }: Props
         : q
     ))
 
-    setLocalAnswer(sq[idx].answers?.[0]?.option_id || sq[idx].answers?.[0]?.value || '')
+    setLocalAnswer(sq[idx]?.answer_given ?? '')
     setCurrentIdx(idx)
     questionTimerRef.current = 0
   }, [currentIdx, sq, localAnswer])
