@@ -44,7 +44,7 @@ export default function DashboardClient({
     Mathematics: 'green',
   }
 
-  const progressTone = (value: number) => (value >= 70 ? 'easy' : value >= 40 ? 'medium' : 'hard')
+  const progressToDifficulty = (value: number) => (value >= 70 ? 'easy' : value >= 40 ? 'medium' : 'hard')
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-10">
@@ -74,7 +74,7 @@ export default function DashboardClient({
               Start practice
             </Link>
             <div className="flex size-12 items-center justify-center rounded-full border border-white/[0.08] bg-surface-2 text-lg font-bold text-[#93C5FD]">
-              {display?.[0] || 'J'}
+              {display?.[0]?.toUpperCase() ?? '?'}
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function DashboardClient({
                 <p className="text-sm text-white/70 mt-1">{totalSolved} of {totalQ} solved</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <DifficultyBadge level={progressTone(pct)} className="text-white border-white/40" />
+                <DifficultyBadge level={progressToDifficulty(pct)} className="text-white border-white/40" />
                 <div className="rounded-2xl border border-white/20 px-3 py-2 text-xs text-white/80">
                   <span className="font-semibold">{inProgress}</span> in progress
                 </div>
@@ -135,7 +135,7 @@ export default function DashboardClient({
                     <h3 className="text-xl font-bold">{subj}</h3>
                     <p className="text-sm text-white/70 mt-1">{stats.solved} solved • {stats.total - stats.solved} remaining</p>
                   </div>
-                  <DifficultyBadge level={progressTone(progress)} className="text-white border-white/40" />
+                  <DifficultyBadge level={progressToDifficulty(progress)} className="text-white border-white/40" />
                 </div>
                 <div className="mt-6">
                   <div className="h-2 w-full rounded-full bg-white/15 overflow-hidden">

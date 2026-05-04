@@ -21,7 +21,7 @@ export function MobileBottomNav() {
     <nav className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,420px)] -translate-x-1/2 rounded-3xl border border-white/[0.08] bg-surface/90 px-3 py-2 shadow-2xl backdrop-blur-md md:hidden">
       <div className="grid grid-cols-4 gap-2">
         {items.map((item) => {
-          const active = pathname === item.href || (item.href === '/subjects' && pathname.startsWith('/subjects')) || (item.href === '/dashboard' && pathname === '/dashboard')
+          const active = pathname === item.href || (item.href === '/subjects' && pathname.startsWith('/subjects'))
           const Icon = item.icon
           return (
             <Link

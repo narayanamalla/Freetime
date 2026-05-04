@@ -26,7 +26,7 @@ export function Card({ variant = 'dark', tone = 'blue', className, children, ...
       )}
       {...props}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-60 mix-blend-screen bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.16),_transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-60 mix-blend-screen bg-[radial-gradient(circle_at_top,_var(--color-card-overlay),_transparent_60%)]" />
       <div className="relative z-10">{children}</div>
     </div>
   )
@@ -90,7 +90,7 @@ type DifficultyBadgeProps = {
 }
 
 export function DifficultyBadge({ level, className }: DifficultyBadgeProps) {
-  const key = (level || '').toLowerCase()
+  const key = level?.toLowerCase() ?? ''
   const styles =
     key === 'easy'
       ? 'bg-[#84CC16]/15 text-[#BEF264] border-[#84CC16]/30'
