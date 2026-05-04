@@ -13,19 +13,29 @@ function formatTime(s: number) {
   return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
 }
 
-function getShapeClasses(status: string) {
+function getShapeClasses(status: string, isActive = false) {
   switch (status) {
     case 'not_visited':
-      return 'bg-[#e2e2e2] text-[#555] border border-[#ccc] rounded'
+      return isActive 
+        ? 'bg-white text-black border-2 border-[#1a6fc4] rounded' 
+        : 'bg-[#e2e2e2] text-[#555] border border-[#ccc] rounded'
     case 'not_answered':
-      return 'bg-[#e53e3e] text-white [clip-path:polygon(0_0,100%_0,100%_75%,50%_100%,0_75%)]'
+      return isActive 
+        ? 'bg-[#ff6b6b] text-white [clip-path:polygon(0_0,100%_15%,100%_85%,0_100%)]' 
+        : 'bg-[#e53e3e] text-white [clip-path:polygon(0_0,100%_15%,100%_85%,0_100%)]'
     case 'answered':
-      return 'bg-[#38a169] text-white [clip-path:polygon(0_0,75%_0,100%_50%,75%_100%,0_100%)]'
+      return isActive 
+        ? 'bg-[#48c774] text-white [clip-path:polygon(0_0,100%_15%,100%_85%,0_100%)]' 
+        : 'bg-[#38a169] text-white [clip-path:polygon(0_0,100%_15%,100%_85%,0_100%)]'
     case 'marked':
     case 'answered_marked':
-      return 'bg-[#805ad5] text-white rounded-full'
+      return isActive 
+        ? 'bg-[#9f7aea] text-white rounded-full' 
+        : 'bg-[#805ad5] text-white rounded-full'
     default:
-      return 'bg-[#e2e2e2] text-[#555] border border-[#ccc] rounded'
+      return isActive 
+        ? 'bg-white text-black border border-[#ccc] rounded' 
+        : 'bg-[#e2e2e2] text-[#555] border border-[#ccc] rounded'
   }
 }
 
@@ -364,25 +374,16 @@ export default function ExamInterface({
                   const s = item.sq
                   const i = item.globalIdx
                   const isActive = i === currentIdx
-                  const styleClasses = getShapeClasses(s.visit_status)
+                  const styleClasses = getShapeClasses(s.visit_status, isActive)
 
                   return (
                     <button
                       key={s.id}
                       onClick={() => onNavigate(i)}
                       title={`Question ${idx + 1}`}
-                      className={`w-[42px] h-[36px] text-[13px] font-bold transition-all flex items-center justify-center relative ${styleClasses}`}
+                      className={`w-[42px] h-[36px] text-[13px] font-bold transition-all duration-200 flex items-center justify-center relative ${styleClasses} ${isActive ? 'z-10' : 'z-1 hover:brightness-110 hover:-translate-y-0.5'}`}
                       style={{
-                        filter: isActive
-                          ? 'drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 3px #ffffff) drop-shadow(0 0 3px #ffffff)'
-                          : 'none',
-                        zIndex: isActive ? 10 : 1,
-                      }}
-                      onMouseEnter={e => {
-                        if (!isActive) (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.3)'
-                      }}
-                      onMouseLeave={e => {
-                        if (!isActive) (e.currentTarget as HTMLButtonElement).style.filter = 'none'
+                        filter: isActive ? 'drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)' : 'none'
                       }}
                     >
                       <span className={s.visit_status === 'answered' ? 'mr-0.5' : ''}>
