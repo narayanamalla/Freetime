@@ -90,8 +90,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: 20, y: 10 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute -right-8 top-[18%] surface-glass-strong rounded-2xl p-4 flex items-center gap-3 shadow-[0_20px_48px_-12px_rgba(0,0,0,0.7),0_0_0_1px_rgba(96,165,250,0.15)] min-w-[160px]"
-              style={{ animation: 'floatSlow 8s ease-in-out infinite' }}
+              className="absolute -right-8 top-[18%] surface-glass-strong rounded-2xl p-4 flex items-center gap-3 shadow-[0_20px_48px_-12px_rgba(0,0,0,0.7),0_0_0_1px_rgba(96,165,250,0.15)] min-w-[160px] animate-float-slow"
             >
               <div className="size-9 rounded-xl icon-3d-blue border border-accent-electric/25 grid place-items-center shrink-0">
                 <Trophy className="h-4 w-4 text-accent-electric" />
@@ -106,8 +105,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, x: -20, y: -10 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.7, delay: 0.75, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute -left-8 bottom-[22%] surface-glass-strong rounded-2xl p-4 flex items-center gap-3 shadow-[0_20px_48px_-12px_rgba(0,0,0,0.7),0_0_0_1px_rgba(96,165,250,0.15)] min-w-[155px]"
-              style={{ animation: 'floatSlow 10s ease-in-out infinite reverse' }}
+              className="absolute -left-8 bottom-[22%] surface-glass-strong rounded-2xl p-4 flex items-center gap-3 shadow-[0_20px_48px_-12px_rgba(0,0,0,0.7),0_0_0_1px_rgba(96,165,250,0.15)] min-w-[155px] animate-float-slower"
             >
               <div className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/25 grid place-items-center shrink-0">
                 <Activity className="h-4 w-4 text-emerald-400" />
