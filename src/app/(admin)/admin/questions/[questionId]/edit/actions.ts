@@ -13,6 +13,7 @@ export async function updateQuestion(questionId: string, formData: FormData) {
     const statement = formData.get('statement') as string
     const solution = formData.get('solution') as string
     const hint = formData.get('hint') as string
+    const image_url = formData.get('image_url') as string | null
     
     if (!chapterId) {
       return { error: 'Chapter is required.' }
@@ -26,6 +27,7 @@ export async function updateQuestion(questionId: string, formData: FormData) {
       statement,
       solution: solution || null,
       hint: hint || null,
+      image_url: image_url || null,
     }
 
     if (type === 'numerical') {

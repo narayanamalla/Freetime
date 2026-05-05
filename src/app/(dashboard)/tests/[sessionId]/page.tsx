@@ -34,7 +34,7 @@ export default async function TestSessionPage({
     .select(`
       *,
       questions (
-        id, type, statement, difficulty, correct_answer, hint, solution,
+        id, type, statement, difficulty, correct_answer, hint, solution, image_url,
         chapters (
           id, name,
           subjects (id, name)

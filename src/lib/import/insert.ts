@@ -96,6 +96,7 @@ export async function insertQuestions(questions: ImportQuestion[]) {
       difficulty: q.difficulty,
       hint: q.hint || null,
       solution: q.solution || null,
+      image_url: q.image_url || null,
       tags: q.tags || [],
       source: q.source || null,
       hash: q.hash,

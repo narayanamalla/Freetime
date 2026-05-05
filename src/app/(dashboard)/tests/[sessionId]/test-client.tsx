@@ -21,6 +21,7 @@ export type SessionQuestion = {
     correct_answer: string | null
     hint: string | null
     solution: string | null
+    image_url: string | null
     chapters: { id: string; name: string; subjects: { id: string; name: string } }
   }
   options: { id: string; question_id: string; text: string; is_correct: boolean }[]

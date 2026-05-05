@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef } from 'react'
 import { updateQuestion } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
+const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_KEY!
 
 const inputCls = "w-full bg-surface-2 border border-border rounded-md px-4 py-3 text-foreground placeholder:text-muted-2 focus:border-accent-glow focus:outline-none focus:ring-2 focus:ring-accent-glow/30 transition text-sm"
 const textareaCls = `${inputCls} resize-none`
@@ -21,6 +24,12 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
   const [type, setType] = useState(initialData.type || 'mcq')
   const [isPending, startTransition] = useTransition()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Image upload state — seeded from existing value
+  const [imageUrl, setImageUrl] = useState<string>(initialData.image_url || '')
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const supabase = createClient()
 
@@ -43,6 +52,40 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
     }
     loadChapters()
   }, [selectedSubject, supabase, initialData])
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImageError(null)
+    setImageUploading(true)
+    setImageUrl('')
+
+    try {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+        method: 'POST',
+        body: fd,
+      })
+      const json = await res.json()
+      if (json.success) {
+        setImageUrl(json.data.url)
+      } else {
+        setImageError('Upload failed. Please try again.')
+      }
+    } catch {
+      setImageError('Network error during upload.')
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
+  function handleRemoveImage() {
+    setImageUrl('')
+    setImageError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   async function handleSubmit(formData: FormData) {
     setErrorMsg(null)
@@ -139,6 +182,79 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
               <textarea name="statement" defaultValue={initialData.statement} placeholder="Enter the question text here..." rows={4} required className={textareaCls} />
             </div>
 
+            {/* ── IMAGE UPLOAD ── */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-foreground">
+                Question Image <span className="text-muted-2 font-normal">(Optional — diagrams, figures)</span>
+              </Label>
+
+              {/* Hidden input carries the current URL to the server action */}
+              <input type="hidden" name="image_url" value={imageUrl} />
+
+              {imageUrl ? (
+                <div className="space-y-3">
+                  <div className="flex justify-center bg-surface-2 border border-border rounded-xl p-3">
+                    <Image
+                      src={imageUrl}
+                      alt="Question diagram preview"
+                      width={600}
+                      height={300}
+                      className="max-h-[220px] w-auto object-contain rounded"
+                      unoptimized
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="text-xs text-red-400 hover:text-red-300 underline transition-colors"
+                  >
+                    ✕ Remove Image
+                  </button>
+                </div>
+              ) : (
+                <label
+                  htmlFor="image-upload-edit"
+                  className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl px-6 py-8 cursor-pointer transition-colors ${
+                    imageUploading
+                      ? 'border-accent-glow/50 bg-accent-glow/5 cursor-not-allowed'
+                      : 'border-border hover:border-accent-glow/60 hover:bg-surface-2'
+                  }`}
+                >
+                  {imageUploading ? (
+                    <>
+                      <svg className="animate-spin w-6 h-6 text-accent-glow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      <span className="text-sm text-muted">Uploading image…</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 text-muted-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm text-muted">Click to upload a diagram or figure</span>
+                      <span className="text-xs text-muted-2">PNG, JPG, GIF, WebP</span>
+                    </>
+                  )}
+                  <input
+                    id="image-upload-edit"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={imageUploading}
+                    onChange={handleImageChange}
+                  />
+                </label>
+              )}
+
+              {imageError && (
+                <p className="text-xs text-red-400">{imageError}</p>
+              )}
+            </div>
+            {/* ── END IMAGE UPLOAD ── */}
+
             {type === 'mcq' ? (
               <div className="space-y-4 border border-border bg-surface-2 p-5 rounded-xl">
                 <Label className="text-sm font-bold text-foreground">Options &amp; Correct Answer</Label>
@@ -175,8 +291,8 @@ export default function EditQuestionClient({ questionId, initialData }: { questi
           </div>
 
           <div className="border-t border-border px-6 py-5">
-            <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Updating…' : 'Update Question'}
+            <Button type="submit" variant="primary" disabled={isPending || imageUploading}>
+              {imageUploading ? 'Uploading image…' : isPending ? 'Updating…' : 'Update Question'}
             </Button>
           </div>
         </form>

@@ -16,6 +16,7 @@ const QuestionSchema = z.object({
   correct_answer: z.string().optional(),
   hint: z.string().optional(),
   solution: z.string().optional(),
+  image_url: z.string().optional(),
   tags: z.array(z.string()).optional(),
   source: z.string().optional()
 }).refine(data => {

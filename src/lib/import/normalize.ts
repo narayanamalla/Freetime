@@ -93,6 +93,7 @@ export function normalizeImportData(data: RawImportData[]): ImportQuestion[] {
       correct_answer: type === 'numerical' ? (correctRaw || '') : undefined,
       hint: findValue(item, 'hint') || undefined,
       solution: findValue(item, 'solution') || undefined,
+      image_url: findValue(item, 'image_url', 'imageurl', 'image', 'diagram') || undefined,
       tags: (() => {
         const raw = findValue(item, 'tags')
         if (!raw) return []

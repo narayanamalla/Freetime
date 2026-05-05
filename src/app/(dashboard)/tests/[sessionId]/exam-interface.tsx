@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Latex from '@/components/ui/latex'
 import type { SessionQuestion } from './test-client'
 import { ChevronRight, ChevronLeft, ArrowDownCircle, Delete } from 'lucide-react'
@@ -201,6 +202,20 @@ export default function ExamInterface({
           <div className="flex-1 overflow-y-auto p-5">
             <div className="bg-[#2a2a2a] p-5 rounded-[4px] text-[15px] leading-relaxed text-[#e0e0e0] mb-6">
               <Latex>{currentQ.statement}</Latex>
+
+              {/* Question diagram — only rendered when image_url exists */}
+              {currentQ.image_url && (
+                <div className="flex justify-center my-6 bg-[#2a2a2a] p-3 rounded-lg border border-gray-700">
+                  <Image
+                    src={currentQ.image_url}
+                    alt="Question diagram"
+                    width={700}
+                    height={300}
+                    className="max-h-[300px] w-auto object-contain rounded"
+                    unoptimized
+                  />
+                </div>
+              )}
             </div>
 
             {isMcq ? (

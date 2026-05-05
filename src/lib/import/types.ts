@@ -13,6 +13,7 @@ export interface ImportQuestion {
   correct_answer?: string
   hint?: string
   solution?: string
+  image_url?: string
   tags?: string[]
   source?: string
   hash?: string
