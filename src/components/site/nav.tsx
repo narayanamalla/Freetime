@@ -5,30 +5,34 @@ import { Sparkles } from 'lucide-react'
 
 export function Nav() {
   return (
-    <nav className="fixed top-0 w-full z-50 nav-glass">
-      <div className="mx-auto max-w-7xl px-6 h-[72px] flex items-center justify-between">
+    <nav className="fixed top-0 w-full z-50 bg-white/60 backdrop-blur-md border-b border-slate-200/50">
+      <div className="mx-auto max-w-[1400px] px-6 h-[80px] flex items-center justify-between">
+        
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="size-10 rounded-xl icon-3d-blue border border-accent-electric/25 transition-transform duration-300 group-hover:scale-[1.03]">
-            <Sparkles className="w-5 h-5 text-accent-electric" />
+          <div className="size-10 rounded-full border border-blue-200 flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.05] bg-white">
+            <Sparkles className="w-5 h-5 text-blue-500" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">JEE Practice</span>
+          <span className="text-xl font-bold tracking-tight text-slate-900 font-serif">JEE Practice</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium text-muted-2">
-          <Link href="#features" className="hover:text-foreground transition-colors">
+        {/* Links */}
+        <div className="hidden md:flex items-center gap-12 text-[15px] font-medium text-slate-400">
+          <Link href="#features" className="hover:text-slate-900 transition-colors">
             Features
           </Link>
-          <Link href="#subjects" className="hover:text-foreground transition-colors">
+          <Link href="#subjects" className="hover:text-slate-900 transition-colors">
             Subjects
           </Link>
-          <Link href="#leaderboard" className="hover:text-foreground transition-colors">
+          <Link href="#leaderboard" className="hover:text-slate-900 transition-colors">
             Leaderboard
           </Link>
         </div>
 
+        {/* CTA */}
         <Link
           href="/dashboard"
-          className="inline-flex items-center justify-center h-10 px-6 text-sm font-semibold rounded-pill bg-gradient-primary text-white shadow-[0_8px_28px_-8px_rgba(59,130,246,0.55)] transition-all hover:brightness-110 active:scale-[0.98]"
+          className="inline-flex items-center justify-center h-11 px-7 text-[15px] font-bold rounded-full bg-blue-600 text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]"
         >
           Start Practicing
         </Link>
