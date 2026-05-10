@@ -3,6 +3,7 @@ import Link from 'next/link'
 import {
   ClipboardList,
   GraduationCap,
+  Calendar,
   CheckCircle2,
   XCircle,
   MinusCircle,
@@ -56,7 +57,7 @@ export default async function TestsPage() {
       />
 
       {/* Mode Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {/* Custom Test Card */}
         <Link href="/tests/new" className="block group">
           <Card variant="white" className="h-full flex flex-col group-hover:border-cyan-400 group-hover:shadow-[0_8px_32px_rgba(6,182,212,0.15)]">
@@ -175,11 +176,15 @@ export default async function TestsPage() {
                     <div className={`size-12 rounded-xl flex-shrink-0 flex items-center justify-center ${
                       session.mode === 'jee_mains'
                         ? 'bg-amber-50 text-amber-500'
-                        : 'bg-cyan-50 text-cyan-500'
+                        : session.mode === 'weekly_exam'
+                          ? 'bg-violet-50 text-violet-500'
+                          : 'bg-cyan-50 text-cyan-500'
                     }`}>
                       {session.mode === 'jee_mains'
                         ? <GraduationCap className="h-6 w-6" />
-                        : <ClipboardList className="h-6 w-6" />
+                        : session.mode === 'weekly_exam'
+                          ? <Calendar className="h-6 w-6" />
+                          : <ClipboardList className="h-6 w-6" />
                       }
                     </div>
 
@@ -187,7 +192,7 @@ export default async function TestsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-bold text-sm text-foreground">
-                          {session.mode === 'jee_mains' ? 'JEE Mains Mock' : 'Custom Test'}
+                          {session.mode === 'jee_mains' ? 'JEE Mains Mock' : session.mode === 'weekly_exam' ? 'Weekly Exam' : 'Custom Test'}
                         </span>
                         {isInProgress ? (
                           <span className="text-[10px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 rounded-md px-2 py-0.5">

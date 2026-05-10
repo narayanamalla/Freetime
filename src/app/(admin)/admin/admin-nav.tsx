@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Calendar } from 'lucide-react'
 
 export function AdminNav() {
   const pathname = usePathname()
@@ -9,7 +10,10 @@ export function AdminNav() {
   const links = [
     { name: 'All Questions', href: '/admin', exact: true },
     { name: 'Subjects & Chapters', href: '/admin/subjects', exact: false },
+    { name: 'Exam Bank', href: '/admin/exam-bank', exact: false },
+    { name: 'Weekly Exams', href: '/admin/weekly-exams', exact: false },
   ]
+
 
   return (
     <div className="flex items-center gap-2 mb-6 border-b border-border pb-4">

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { logout } from '@/app/(auth)/actions'
 import { Button } from '@/components/ui/button'
-import { BookOpen, LayoutDashboard, FlaskConical, ClipboardList, Bell, Sparkles, Bookmark } from 'lucide-react'
+import { BookOpen, LayoutDashboard, FlaskConical, ClipboardList, Bell, Sparkles, Bookmark, Calendar } from 'lucide-react'
 import { SidebarLink } from '@/components/site/sidebar-link'
 import { MobileSidebarToggle } from '@/components/site/mobile-sidebar'
 import { MobileBottomNav } from '@/components/site/mobile-bottom-nav'
@@ -47,6 +47,7 @@ export default async function DashboardLayout({
             <SidebarLink href="/subjects" icon={<BookOpen className="h-[18px] w-[18px]" />} label="Learn" />
             <SidebarLink href="/subjects" icon={<FlaskConical className="h-[18px] w-[18px]" />} label="Practice" />
             <SidebarLink href="/tests" icon={<ClipboardList className="h-[18px] w-[18px]" />} label="Tests" />
+            <SidebarLink href="/exams" icon={<Calendar className="h-[18px] w-[18px]" />} label="Exams" />
             <div className="h-px bg-[var(--color-border)] mx-1 my-3" />
             <p className="px-3 mb-2 section-label">Library</p>
             <SidebarLink href="/subjects" icon={<Bookmark className="h-[18px] w-[18px]" />} label="Bookmarks" disabled />
