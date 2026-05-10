@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { WeeklyExamForm } from './weekly-exam-form'
 
@@ -18,7 +18,9 @@ export default async function NewWeeklyExamPage() {
     console.log('Bypassing admin check for dev (weekly-exams-new)')
   }
 
-  const { data: questions } = await supabase
+  // Must use admin client — exam questions are hidden from regular users via RLS
+  const adminSupabase = createAdminClient()
+  const { data: questions } = await adminSupabase
     .from('questions')
     .select('id, statement, type, difficulty, chapters(name, subjects(name))')
     .eq('visibility', 'exam')
