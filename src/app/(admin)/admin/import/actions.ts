@@ -42,7 +42,7 @@ export async function processImportData(normalizedQuestions: ImportQuestion[]): 
 
 export async function commitImport(questions: ImportQuestion[]) {
   const result = await insertQuestions(questions)
-  revalidatePath('/admin')
+  revalidatePath('/admin', 'layout')
   revalidatePath('/dashboard')
   revalidatePath('/subjects')
   return result

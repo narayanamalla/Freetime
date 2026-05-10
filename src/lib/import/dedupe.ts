@@ -8,7 +8,8 @@ export async function generateHash(q: ImportQuestion): Promise<string> {
     ? q.options.map(o => o.text.trim().toLowerCase()).sort().join('|')
     : q.correct_answer?.trim().toLowerCase() || ''
   
-  const rawString = `${q.subject}|${q.chapter}|${q.type}|${normalizedStatement}|${normalizedOptions}`
+  const visibility = q.visibility || 'public'
+  const rawString = `${q.subject}|${q.chapter}|${q.type}|${visibility}|${normalizedStatement}|${normalizedOptions}`
   
   // Use SubtleCrypto for hashing if available
   if (typeof crypto !== 'undefined' && crypto.subtle) {
