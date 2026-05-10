@@ -57,10 +57,37 @@ export default async function ResultPage({
     options: (allOptions ?? []).filter(o => o.question_id === (sq.questions as any).id),
   }))
 
+  // ── Leaderboard (weekly exams only) ──────────────────────────────────────
+  let leaderboard: any[] | null = null
+
+  if (session.weekly_exam_id && session.status === 'submitted') {
+    const { data: exam } = await supabase
+      .from('weekly_exams')
+      .select('ends_at')
+      .eq('id', session.weekly_exam_id)
+      .single()
+
+    if (exam && new Date() > new Date(exam.ends_at)) {
+      const { data: lb } = await supabase
+        .from('test_sessions')
+        .select('id, user_id, score, correct, incorrect, time_taken, profiles(name)')
+        .eq('weekly_exam_id', session.weekly_exam_id)
+        .eq('status', 'submitted')
+        .order('score', { ascending: false })
+        .order('time_taken', { ascending: true })
+        .limit(20)
+
+      leaderboard = lb ?? null
+    }
+  }
+
   return (
     <ResultClient
       session={session}
       sessionQuestions={enriched}
+      leaderboard={leaderboard}
+      currentUserId={user.id}
     />
   )
 }
+

@@ -363,3 +363,68 @@ export async function submitTest(sessionId: string, totalTimeTaken: number) {
 
   return { success: true, score: totalScore }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. createWeeklyExamSession
+// ─────────────────────────────────────────────────────────────────────────────
+export async function createWeeklyExamSession(weeklyExamId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: exam } = await supabase
+    .from('weekly_exams')
+    .select('*')
+    .eq('id', weeklyExamId)
+    .eq('is_published', true)
+    .single()
+
+  if (!exam) return { error: 'Exam not found or not published' }
+
+  const now = new Date()
+  if (now < new Date(exam.starts_at)) return { error: 'This exam has not started yet' }
+  if (now > new Date(exam.ends_at)) return { error: 'The exam window has closed' }
+
+  const { data: existing } = await supabase
+    .from('test_sessions')
+    .select('id, status')
+    .eq('user_id', user.id)
+    .eq('weekly_exam_id', weeklyExamId)
+    .maybeSingle()
+
+  if (existing) {
+    if (existing.status === 'in_progress') redirect(`/tests/${existing.id}/instructions`)
+    return { error: 'You have already attempted this exam' }
+  }
+
+  const { data: session, error: sErr } = await supabase
+    .from('test_sessions')
+    .insert({
+      user_id: user.id,
+      mode: 'weekly_exam',
+      weekly_exam_id: weeklyExamId,
+      config: { exam_title: exam.title },
+      status: 'in_progress',
+      total_questions: exam.question_ids.length,
+      time_limit_minutes: exam.duration_minutes,
+      max_score: exam.question_ids.length * 4,
+    })
+    .select('id')
+    .single()
+
+  if (sErr || !session) return { error: sErr?.message ?? 'Failed to create session' }
+
+  const rows = (exam.question_ids as string[]).map((qid, i) => ({
+    session_id: session.id,
+    question_id: qid,
+    order_index: i,
+  }))
+
+  const { error: sqErr } = await supabase
+    .from('test_session_questions')
+    .insert(rows)
+
+  if (sqErr) return { error: sqErr.message }
+
+  redirect(`/tests/${session.id}/instructions`)
+}

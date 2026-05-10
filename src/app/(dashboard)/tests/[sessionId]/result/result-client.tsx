@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Latex from '@/components/ui/latex'
 import {
   CheckCircle2, XCircle, MinusCircle, Clock, Target,
-  ChevronDown, ChevronUp, ArrowRight, Trophy,
+  ChevronDown, ChevronUp, ArrowRight, Trophy, Medal, Timer, BarChart3,
 } from 'lucide-react'
 
 type Option = { id: string; question_id: string; text: string; is_correct: boolean }
@@ -30,9 +30,21 @@ type SQ = {
   options: Option[]
 }
 
+type LeaderboardEntry = {
+  id: string
+  user_id: string
+  score: number
+  correct: number
+  incorrect: number
+  time_taken: number
+  profiles: { name: string } | null
+}
+
 type Props = {
   session: any
   sessionQuestions: SQ[]
+  leaderboard?: LeaderboardEntry[] | null
+  currentUserId?: string
 }
 
 function formatDuration(s: number) {
@@ -46,7 +58,7 @@ function formatDuration(s: number) {
 
 type Filter = 'all' | 'correct' | 'wrong' | 'skipped'
 
-export default function ResultClient({ session, sessionQuestions }: Props) {
+export default function ResultClient({ session, sessionQuestions, leaderboard, currentUserId }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
@@ -108,7 +120,7 @@ export default function ResultClient({ session, sessionQuestions }: Props) {
             <div className="flex items-center gap-2 mb-1">
               <Trophy className="h-5 w-5 text-amber-400" />
               <span className="text-xs font-bold uppercase tracking-wider text-muted">
-                {session.mode === 'jee_mains' ? 'JEE Mains Mock' : 'Custom Test'}
+                {session.mode === 'jee_mains' ? 'JEE Mains Mock' : session.mode === 'weekly_exam' ? 'Weekly Exam' : 'Custom Test'}
               </span>
             </div>
             <p className="text-base text-muted mt-1">{remark}</p>
@@ -166,6 +178,194 @@ export default function ResultClient({ session, sessionQuestions }: Props) {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* TIME MANAGEMENT PANEL */}
+      {(() => {
+        const attempted = sessionQuestions.filter(sq => !!sq.answer_given)
+        const correctSqs = sessionQuestions.filter(sq => sq.is_correct === true)
+        const wrongSqs = sessionQuestions.filter(sq => sq.is_correct === false && !!sq.answer_given)
+        const avgTime = sessionQuestions.length > 0
+          ? Math.round(sessionQuestions.reduce((s, sq) => s + (sq.time_taken ?? 0), 0) / sessionQuestions.length)
+          : 0
+        const avgCorrectTime = correctSqs.length > 0
+          ? Math.round(correctSqs.reduce((s, sq) => s + (sq.time_taken ?? 0), 0) / correctSqs.length)
+          : 0
+        const avgWrongTime = wrongSqs.length > 0
+          ? Math.round(wrongSqs.reduce((s, sq) => s + (sq.time_taken ?? 0), 0) / wrongSqs.length)
+          : 0
+        const maxAvg = Math.max(avgCorrectTime, avgWrongTime, 1)
+
+        return (
+          <div className="rounded-2xl surface-glass p-6 space-y-4 border border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <Timer className="h-4 w-4 text-accent-electric" />
+              <h2 className="font-bold text-foreground">Time Management</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { label: 'Avg per question', value: formatDuration(avgTime), color: 'text-accent-electric' },
+                { label: 'Avg on correct', value: correctSqs.length > 0 ? formatDuration(avgCorrectTime) : '—', color: 'text-emerald-400' },
+                { label: 'Avg on wrong', value: wrongSqs.length > 0 ? formatDuration(avgWrongTime) : '—', color: 'text-red-400' },
+              ].map(item => (
+                <div key={item.label} className="rounded-xl border border-white/[0.07] bg-surface-2/70 p-3 text-center">
+                  <p className={`text-lg font-extrabold ${item.color}`}>{item.value}</p>
+                  <p className="text-[11px] text-muted mt-0.5">{item.label}</p>
+                </div>
+              ))}
+            </div>
+            {(correctSqs.length > 0 || wrongSqs.length > 0) && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-2 font-medium">Correct vs Wrong — time comparison</p>
+                <div className="space-y-1.5">
+                  <div>
+                    <div className="flex justify-between text-xs mb-0.5">
+                      <span className="text-emerald-400 font-medium">Correct</span>
+                      <span className="text-emerald-400">{formatDuration(avgCorrectTime)}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-surface-2 overflow-hidden">
+                      <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${(avgCorrectTime / maxAvg) * 100}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-0.5">
+                      <span className="text-red-400 font-medium">Wrong</span>
+                      <span className="text-red-400">{formatDuration(avgWrongTime)}</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-surface-2 overflow-hidden">
+                      <div className="h-full rounded-full bg-red-500 transition-all" style={{ width: `${(avgWrongTime / maxAvg) * 100}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* DIFFICULTY BREAKDOWN PANEL */}
+      {(() => {
+        const levels = ['easy', 'medium', 'hard'] as const
+        const diffMap: Record<string, { total: number; correct: number }> = {
+          easy: { total: 0, correct: 0 },
+          medium: { total: 0, correct: 0 },
+          hard: { total: 0, correct: 0 },
+        }
+        for (const sq of sessionQuestions) {
+          const d = sq.questions.difficulty
+          if (diffMap[d]) {
+            diffMap[d].total++
+            if (sq.is_correct) diffMap[d].correct++
+          }
+        }
+        const hasData = levels.some(l => diffMap[l].total > 0)
+        if (!hasData) return null
+
+        const diffColors: Record<string, { bar: string; text: string; badge: string }> = {
+          easy: { bar: 'bg-emerald-500', text: 'text-emerald-400', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+          medium: { bar: 'bg-amber-500', text: 'text-amber-400', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+          hard: { bar: 'bg-red-500', text: 'text-red-400', badge: 'bg-red-500/10 text-red-400 border-red-500/20' },
+        }
+
+        return (
+          <div className="rounded-2xl surface-glass p-6 space-y-4 border border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-accent-electric" />
+              <h2 className="font-bold text-foreground">Difficulty Breakdown</h2>
+            </div>
+            <div className="space-y-3">
+              {levels.filter(l => diffMap[l].total > 0).map(level => {
+                const { total, correct } = diffMap[level]
+                const pct = Math.round((correct / total) * 100)
+                const { bar, text, badge } = diffColors[level]
+                return (
+                  <div key={level}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${badge}`}>
+                          {level}
+                        </span>
+                        <span className="text-xs text-muted">{correct}/{total} correct</span>
+                      </div>
+                      <span className={`text-sm font-bold ${text}`}>{pct}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-surface-2 overflow-hidden">
+                      <div className={`h-full rounded-full ${bar} transition-all`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* LEADERBOARD (weekly exams only, after exam ends) */}
+      {leaderboard && leaderboard.length > 0 && (
+        <div className="rounded-2xl surface-glass-strong overflow-hidden border border-white/[0.07]">
+          <div className="flex items-center gap-2 p-5 border-b border-white/[0.06]">
+            <Medal className="h-5 w-5 text-amber-400" />
+            <h2 className="font-bold text-foreground">Leaderboard</h2>
+            <span className="text-xs text-muted ml-auto">Top {leaderboard.length} students</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/[0.06] bg-surface-2/40">
+                  <th className="text-left py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-2">Rank</th>
+                  <th className="text-left py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-2">Name</th>
+                  <th className="text-right py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-2">Score</th>
+                  <th className="text-right py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-2">Correct</th>
+                  <th className="text-right py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-2">Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {leaderboard.map((entry, idx) => {
+                  const isMe = entry.user_id === currentUserId
+                  const rankIcons: Record<number, string> = { 0: '🥇', 1: '🥈', 2: '🥉' }
+                  return (
+                    <tr
+                      key={entry.id}
+                      className={`transition-colors ${
+                        isMe
+                          ? 'bg-violet-500/10 border-l-2 border-l-violet-400'
+                          : 'hover:bg-surface-2/40'
+                      }`}
+                    >
+                      <td className="py-3 px-4">
+                        <span className="font-bold text-muted-2 text-xs">
+                          {rankIcons[idx] ?? `#${idx + 1}`}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`font-medium text-sm ${
+                          isMe ? 'text-violet-300 font-bold' : 'text-foreground'
+                        }`}>
+                          {entry.profiles?.name ?? 'Anonymous'}
+                          {isMe && <span className="ml-1.5 text-[10px] font-bold bg-violet-500/20 text-violet-400 rounded px-1.5 py-0.5">You</span>}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span className={`font-bold text-sm ${
+                          idx === 0 ? 'text-amber-400' : isMe ? 'text-violet-300' : 'text-foreground'
+                        }`}>
+                          {entry.score}
+                          <span className="text-muted text-xs font-normal">/{session.max_score}</span>
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span className="text-emerald-400 font-medium text-xs">{entry.correct ?? 0}</span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span className="text-muted text-xs">{formatDuration(entry.time_taken ?? 0)}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
