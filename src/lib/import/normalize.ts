@@ -100,6 +100,7 @@ export function normalizeImportData(data: RawImportData[]): ImportQuestion[] {
         return raw.split(',').map(s => s.trim())
       })(),
       source: findValue(item, 'source') || undefined,
+      visibility: (findValue(item, 'visibility') || 'public').toLowerCase() as 'public' | 'exam',
     }
   })
 }

@@ -100,7 +100,8 @@ export async function insertQuestions(questions: ImportQuestion[]) {
       tags: q.tags || [],
       source: q.source || null,
       hash: q.hash,
-      correct_answer: q.correct_answer || null
+      correct_answer: q.correct_answer || null,
+      visibility: q.visibility || 'public'
     }
 
     const { data: newQuestion, error: qError } = await supabase.from('questions').insert(questionData).select('id').single()

@@ -17,6 +17,7 @@ export interface ImportQuestion {
   tags?: string[]
   source?: string
   hash?: string
+  visibility?: 'public' | 'exam'
 }
 
 export interface RawImportData {
