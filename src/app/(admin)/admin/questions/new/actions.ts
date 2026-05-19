@@ -1,11 +1,11 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 export async function createQuestion(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const chapterId = formData.get('chapterId') as string
   const type = formData.get('type') as string
